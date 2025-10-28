@@ -1,0 +1,113 @@
+# Phiên bản OpenAPI
+openapi: 3.0.3
+
+# Thông tin cơ bản
+info:
+  title: "Stateless Calculator API"
+  description: |
+    Demo về một API stateless hoàn toàn.
+    Máy chủ không lưu trữ bất kỳ trạng thái (state) hay phiên (session) nào.
+    Mỗi yêu cầu đều chứa đầy đủ thông tin (các con số) để máy chủ xử lý và trả về kết quả ngay lập tức.
+  version: "1.0.0"
+
+# (Tùy chọn) Máy chủ API
+servers:
+  - url: "http://localhost:3000"
+
+# Định nghĩa các đường dẫn (endpoints)
+paths:
+
+  /add:
+    get:
+      summary: "Cộng hai số"
+      description: "Endpoint stateless nhận hai số 'a' và 'b' qua query params và trả về tổng."
+      tags:
+        - "Calculator"
+      parameters:
+        - in: query
+          name: a
+          required: true
+          description: "Số hạng thứ nhất"
+          schema:
+            type: number
+            example: 10
+        - in: query
+          name: b
+          required: true
+          description: "Số hạng thứ hai"
+          schema:
+            type: number
+            example: 5
+      responses:
+        '200':
+          description: "Kết quả của phép cộng"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalculationResult"
+        '400':
+          description: "Đầu vào không hợp lệ (ví dụ: thiếu tham số hoặc không phải là số)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /subtract:
+    get:
+      summary: "Trừ hai số"
+      description: "Endpoint stateless nhận hai số 'a' và 'b' qua query params và trả về hiệu (a - b)."
+      tags:
+        - "Calculator"
+      parameters:
+        - in: query
+          name: a
+          required: true
+          description: "Số bị trừ"
+          schema:
+            type: number
+            example: 10
+        - in: query
+          name: b
+          required: true
+          description: "Số trừ"
+          schema:
+            type: number
+            example: 5
+      responses:
+        '200':
+          description: "Kết quả của phép trừ"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalculationResult"
+        '400':
+          description: "Đầu vào không hợp lệ"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+# Các thành phần tái sử dụng (Schemas)
+components:
+  schemas:
+    CalculationResult:
+      type: object
+      properties:
+        operation:
+          type: string
+          example: "add"
+        a:
+          type: number
+          example: 10
+        b:
+          type: number
+          example: 5
+        result:
+          type: number
+          example: 15
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Tham số 'a' và 'b' là bắt buộc và phải là số."

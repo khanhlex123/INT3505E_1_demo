@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini API Tester</title>
+  <style>
+    /* CSS đơn giản cho giao diện */
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 20px; 
+      background-color: #f4f4f4; 
+    }
+    .container { 
+      max-width: 900px; 
+      margin: auto; 
+      background: #fff; 
+      padding: 20px; 
+      border-radius: 8px; 
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .request-form { display: grid; grid-template-columns: 120px 1fr 100px; gap: 10px; margin-bottom: 20px; }
+    .request-form input, .request-form select, .request-form button {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .request-form button { background-color: #007bff; color: white; cursor: pointer; border: none; }
+    .request-form button:hover { background-color: #0056b3; }
+    .tabs { display: flex; margin-bottom: 10px; }
+    .tab { padding: 10px 15px; cursor: pointer; border-bottom: 2px solid transparent; }
+    .tab.active { border-bottom: 2px solid #007bff; font-weight: bold; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    textarea { width: 98%; min-height: 150px; font-family: monospace; }
+    h2 { margin-top: 0; }
+    .response-area {
+      background-color: #282c34;
+      color: #abb2bf;
+      padding: 15px;
+      border-radius: 5px;
+      min-height: 200px;
+      font-family: monospace;
+      white-space: pre-wrap; /* Cho phép xuống dòng */
+      word-wrap: break-word; /* Bẻ từ nếu quá dài */
+    }
+    .status-badge {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .status-ok { color: #28a745; }
+    .status-error { color: #dc3545; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Trình Test API (Proxy)</h2>
+
+    <div class="request-form">
+      <select id="http-method">
+        <option value="GET" selected>GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+      </select>
+      <input type="text" id="api-url" placeholder="Nhập URL của API, ví dụ: https://api.github.com/users/google">
+      <button id="send-btn">Gửi (Send)</button>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="showPanel('body')">Body (JSON)</div>
+      <div class="tab" onclick="showPanel('headers')">Headers</div>
+    </div>
+    
+    <div id="panel-body" class="panel active">
+      <textarea id="req-body" placeholder="Chỉ dùng cho POST/PUT. Nhập JSON body tại đây..."></textarea>
+    </div>
+    <div id="panel-headers" class="panel">
+      <textarea id="req-headers" placeholder="Nhập headers, ví dụ: { 'Authorization': 'Bearer ...' }"></textarea>
+    </div>
+
+    <h2>Kết quả (Response)</h2>
+    <div>
+      <strong>Status:</strong> <span id="res-status" class="status-badge"></span>
+    </div>
+    <pre id="res-body" class="response-area">Chờ yêu cầu...</pre>
+  </div>
+
+  <script>
+    // ==========================================================
+    // LOGIC JAVASCRIPT
+    // ==========================================================
+
+    const sendBtn = document.getElementById('send-btn');
+    const methodEl = document.getElementById('http-method');
+    const urlEl = document.getElementById('api-url');
+    const bodyEl = document.getElementById('req-body');
+    const headersEl = document.getElementById('req-headers');
+    const statusEl = document.getElementById('res-status');
+    const resBodyEl = document.getElementById('res-body');
+
+    // Địa chỉ server proxy của chúng ta
+    const PROXY_SERVER_URL = 'http://localhost:3000/proxy';
+
+    // Xử lý chuyển tab Body/Headers
+    function showPanel(panelName) {
+      document.querySelector('.tab.active').classList.remove('active');
+      document.querySelector(`.tab[onclick="showPanel('${panelName}')"]`).classList.add('active');
+      
+      document.querySelector('.panel.active').classList.remove('active');
+      document.getElementById(`panel-${panelName}`).classList.add('active');
+    }
+
+    // Xử lý khi nhấn nút "Gửi"
+    sendBtn.onclick = async () => {
+      // 1. Lấy tất cả dữ liệu từ giao diện
+      const method = methodEl.value;
+      const url = urlEl.value;
+      let bodyData = null;
+      let headersData = {};
+
+      // 2. Xử lý body (phải là JSON hợp lệ)
+      if (method === 'POST' || method === 'PUT') {
+        try {
+          bodyData = JSON.parse(bodyEl.value || '{}');
+        } catch (e) {
+          alert('Lỗi: JSON Body không hợp lệ.');
+          return;
+        }
+      }
+      
+      // 3. Xử lý headers (phải là JSON hợp lệ)
+      try {
+        headersData = JSON.parse(headersEl.value || '{}');
+      } catch (e) {
+        alert('Lỗi: JSON Headers không hợp lệ.');
+        return;
+      }
+
+      // 4. Hiển thị trạng thái "Đang tải..."
+      statusEl.textContent = 'Đang tải...';
+      statusEl.className = 'status-badge';
+      resBodyEl.textContent = '';
+
+      try {
+        // 5. Gửi yêu cầu ĐẾN MÁY CHỦ PROXY
+        const response = await fetch(PROXY_SERVER_URL, {
+          method: 'POST', // Luôn là POST để gửi thông tin đến proxy
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // Body của proxy chứa thông tin yêu cầu THỰC TẾ
+          body: JSON.stringify({
+            method: method,
+            url: url,
+            body: bodyData,
+            headers: headersData
+          }),
+        });
+
+        // 6. Lấy kết quả proxy trả về
+        const data = await response.json();
+        
+        // 7. Hiển thị kết quả
+        statusEl.textContent = `${response.status} ${response.statusText}`;
+        if (response.ok) {
+          statusEl.classList.add('status-ok');
+        } else {
+          statusEl.classList.add('status-error');
+        }
+        
+        // Dùng JSON.stringify để format JSON cho đẹp (2 dấu cách)
+        resBodyEl.textContent = JSON.stringify(data, null, 2);
+
+      } catch (error) {
+        // Lỗi nếu không gọi được cả server proxy
+        console.error('Lỗi khi gọi Proxy:', error);
+        statusEl.textContent = 'Lỗi Proxy';
+        statusEl.className = 'status-badge status-error';
+        resBodyEl.textContent = error.message;
+      }
+    };
+  </script>
+</body>
+</html>
