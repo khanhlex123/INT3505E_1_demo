@@ -1,0 +1,1 @@
+https://petstore.swagger.io/?url=https://gist.githubusercontent.com/chie41/b65140804d31ea44748cf505aabf1979/raw/openapi.yaml

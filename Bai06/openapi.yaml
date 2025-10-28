@@ -1,0 +1,127 @@
+openapi: 3.0.0
+info:
+  title: Simple Book Management API
+  version: 1.0.0
+  description: API đơn giản để quản lý sách (CRUD cơ bản)
+
+servers:
+  - url: http://localhost:8080/api
+
+paths:
+  /books:
+    get:
+      summary: Lấy danh sách tất cả sách
+      description: Trả về danh sách toàn bộ sách trong hệ thống.
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+    post:
+      summary: Thêm một cuốn sách mới
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookInput'
+      responses:
+        '201':
+          description: Sách đã được thêm thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+
+  /books/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID của sách
+        schema:
+          type: integer
+
+    get:
+      summary: Lấy thông tin chi tiết của một cuốn sách
+      responses:
+        '200':
+          description: Thông tin sách
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Không tìm thấy sách
+
+    put:
+      summary: Cập nhật thông tin sách
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookInput'
+      responses:
+        '200':
+          description: Đã cập nhật sách thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Không tìm thấy sách
+
+    delete:
+      summary: Xóa một cuốn sách
+      responses:
+        '204':
+          description: Xóa thành công (không có nội dung trả về)
+        '404':
+          description: Không tìm thấy sách
+
+components:
+  schemas:
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Dế Mèn Phiêu Lưu Ký
+        author:
+          type: string
+          example: Tô Hoài
+        year:
+          type: integer
+          example: 1941
+        status:
+          type: string
+          enum: [available, borrowed]
+          example: available
+
+    BookInput:
+      type: object
+      required:
+        - title
+        - author
+      properties:
+        title:
+          type: string
+          example: O Chuột
+        author:
+          type: string
+          example: Tô Hoài
+        year:
+          type: integer
+          example: 1942
+        status:
+          type: string
+          enum: [available, borrowed]
+          example: available
