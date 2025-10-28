@@ -1,0 +1,168 @@
+openapi: 3.0.0
+info:
+  title: Book Management API
+  version: 1.0.0
+  description: API quản lý sách trong thư viện
+
+servers:
+  - url: http://localhost:5000/api
+
+paths:
+  /books:
+    get:
+      summary: Lấy danh sách tất cả sách
+      # parameters:
+      #   - name: author
+      #     in: query
+      #     description: Lọc theo tác giả
+      #     required: false
+      #     schema:
+      #       type: string
+      #       example: "Robert C. Martin"
+      #   - name: limit
+      #     in: query
+      #     description: Giới hạn số lượng sách trả về
+      #     schema:
+      #       type: integer
+      #       default: 10
+      responses:
+        '200':
+          description: Danh sách sách
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+
+    post:
+      summary: Thêm sách mới
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookInput'
+      responses:
+        '201':
+          description: Tạo thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+
+  /books/{id}:
+    get:
+      summary: Lấy thông tin sách theo ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Thông tin sách
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Không tìm thấy
+
+    put:
+      summary: Cập nhật thông tin sách
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookInput'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+
+    delete:
+      summary: Xóa sách theo ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Xóa thành công
+
+components:
+  schemas:
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Clean Code
+        author:
+          type: string
+          example: Robert C. Martin
+        year:
+          type: integer
+          example: 2008
+
+    BookInput:
+      type: object
+      required: [title, author, year]
+      properties:
+        title:
+          type: string
+        author:
+          type: string
+        year:
+          type: integer
+
+
+# paths:
+#   /resource            
+#     HTTP method:              
+#       summary:          
+#       parameters:        
+#       requestBody:       
+#       responses:          
+
+# schema:
+#   <Tên Schema>;
+#     type:
+#     required:
+#     properties:
+#       <tên thuộc tính>:
+#         type:
+#         format:
+#         description:
+#         example:
+
+# parameters:
+#   - name: 
+#     in:         
+#     required:   
+#     description: 
+#     schema:                    
+
+# components:
+#   schemas:
+#   parameters:
+#   responses:
+#   requestBody:
+#   securitySchemas:
