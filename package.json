@@ -1,0 +1,20 @@
+{
+  "name": "int3503e-homework",
+  "version": "1.0.0",
+  "description": "INT3503E Homework - API Development Projects",
+  "main": "index.js",
+  "scripts": {
+    "install-all": "npm install && cd Bai02 && npm install && cd ../Bai04 && npm install && cd ../Bai04-stateless/demo\\ stateless && npm install && cd ../../Tuan5 && npm install",
+    "start:bai02": "cd Bai02 && npm start",
+    "start:bai04": "cd Bai04 && npm start",
+    "start:bai04-stateless": "cd Bai04-stateless/demo\\ stateless && npm start",
+    "start:tuan5": "cd Tuan5 && npm start"
+  },
+  "keywords": ["api", "nodejs", "express", "homework"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
+
